@@ -11,6 +11,7 @@ class TopProductViewModel extends ChangeNotifier{
     loading = true;
     topProductList = await GetTopProductsService();
     loading = false;
+    notifyListeners();
   }
 
 }
