@@ -10,6 +10,7 @@ class TopProductViewModel extends ChangeNotifier{
   topProductVM() async {
     loading = true;
     topProductList = await GetTopProductsService();
+    
     loading = false;
     notifyListeners();
   }

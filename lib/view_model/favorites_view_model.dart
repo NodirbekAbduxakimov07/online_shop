@@ -1,21 +1,58 @@
 import 'package:flutter/cupertino.dart';
 import 'package:online_shop/models/get_top_products.dart';
+import 'package:online_shop/services/hive_service.dart';
 import 'package:online_shop/services/top_products_service.dart';
 import 'package:online_shop/view_model/top_products_view_model.dart';
 
 class FavoritesViewModel extends ChangeNotifier {
 
-  List<DatumTopProducts?>? favoritesList;
+  List favoritesIds = HiveDB.getFavoriteBox();
+  
+  // List<DatumTopProducts?>? datumProvider;
+  // DatumTopProducts? datumTopProducts;
 
-  bool loading = false;
+  void addIdsToFavorite(int? id) async {
 
-  addToFavorite() async {
-    loading = true;
-    favoritesList= await GetTopProductsService();
-    loading = false;
+    HiveDB.favoritesAddBox(favoritesIds);
+    final checkedId = 
+    // favoritesIds.contains(id);
+    HiveDB.getFavoriteBox().contains(id);
+    
+   
+    if(checkedId){
+     
+      favoritesIds.remove(id);
+       HiveDB.favoriteDeleteBox(favoritesIds);
+       notifyListeners();
+      
+      print("${HiveDB.getFavoriteBox()}");
+    
+    } else {
+    
+      favoritesIds.add(id);
+        HiveDB.favoritesAddBox(favoritesIds);
+      notifyListeners();
+      print("${HiveDB.getFavoriteBox()}");
+      
+      
+    }
     notifyListeners();
-
+  
+   
   }
+
+
+  // List<DatumTopProducts?>? favoritesList;
+
+  // bool loading = false;
+
+  // addToFavorite() async {
+  //   loading = true;
+  //   favoritesList= await GetTopProductsService();
+  //   loading = false;
+  //   notifyListeners();
+
+  // }
 
 // List<DatumTopProducts?>? favoritesList = [];
 // List<dynamic> favoritesList = [];

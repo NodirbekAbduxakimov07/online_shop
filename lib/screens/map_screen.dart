@@ -37,7 +37,8 @@ var providerCategories =
               shrinkWrap: true,
               primary: false,
               scrollDirection: Axis.horizontal,
-              itemCount: providerCategories.getCategoriesList?.length,
+              itemCount: 
+              providerCategories.getCategoriesList?.length,
               itemBuilder: ((context, index) {
                 return Container(
                   margin: EdgeInsets.all(5.0),

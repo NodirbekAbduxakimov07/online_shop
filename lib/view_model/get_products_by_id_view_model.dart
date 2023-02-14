@@ -9,12 +9,15 @@ class ProductByIdViewModel extends ChangeNotifier{
   List<DatumTopProducts?>? productByIdList;
   bool loading = false;
   // late int category_id;
+  
 
   ProductByIdVM(int categoryId) async {
+    
     loading = true;
     productByIdList = await GetProductsByIdService(categoryId);
     loading = false;
     notifyListeners();
   }
+  
 
 }

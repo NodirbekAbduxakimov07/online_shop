@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:online_shop/screens/main_screen.dart';
+import 'package:online_shop/view_model/fav_view_model.dart';
 import 'package:online_shop/view_model/favorites_view_model.dart';
 import 'package:online_shop/view_model/get_categories_view_model.dart';
 import 'package:online_shop/view_model/get_offer_view_model.dart';
@@ -29,7 +30,8 @@ await Hive.openBox('shopping_box');
       ChangeNotifierProvider(create: (_) => GetCategoriesViewModel()),
       ChangeNotifierProvider(create: (_) => TopProductViewModel()),
       ChangeNotifierProvider(create: (_) => ProductByIdViewModel()),
-      ChangeNotifierProvider(create: (_) => FavoritesViewModel())
+      ChangeNotifierProvider(create: (_) => FavoritesViewModel()),
+      ChangeNotifierProvider(create: (_) => FavViewModel())
     ],
     child: const MyApp()),
     );

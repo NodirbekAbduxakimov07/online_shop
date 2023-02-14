@@ -17,3 +17,4 @@ Future<List<Datum>?> getoffers() async {
     }
     return result;
   }
+  

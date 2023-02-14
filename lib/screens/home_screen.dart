@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:online_shop/models/get_top_products.dart';
 import 'package:online_shop/screens/detail_screen.dart';
+import 'package:online_shop/services/by_category_id_sceen.dart';
+import 'package:online_shop/services/hive_service.dart';
+import 'package:online_shop/view_model/fav_view_model.dart';
 import 'package:online_shop/view_model/favorites_view_model.dart';
 import 'package:online_shop/view_model/get_categories_view_model.dart';
 import 'package:online_shop/view_model/get_offer_view_model.dart';
@@ -26,6 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    // HiveDB.getFavoriteBox();
+    
     final provider2 = Provider.of<GetOfferViewModel>(context, listen: false);
     provider2.getOffersProvider();
 
@@ -39,18 +45,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final providerProductsByIdVM =
         Provider.of<ProductByIdViewModel>(context, listen: false);
-    providerProductsByIdVM.ProductByIdVM(category_id);
+    providerProductsByIdVM.ProductByIdVM(categoryId);
 
     final providerVM = Provider.of<FavoritesViewModel>(context, listen: false);
-    // providerVM.addFavoriteList(topProduct);
+    providerVM.addIdsToFavorite(favoriteId);
+
+    final providerFav = Provider.of<FavViewModel>(context,listen: false);
+    providerFav.addIdsToFav("");
   }
 
 // List<DatumTopProducts?>? topProduct;
   DatumTopProducts? topProduct;
+  int? favoriteId = 0;
 
   bool checkedCategory = false;
   int currentlyIndex = -1;
-  int category_id = 8;
+  int categoryId = 10;
   int test = -2;
 
   // callback(varTopic){
@@ -60,25 +70,25 @@ class _HomeScreenState extends State<HomeScreen> {
   // }
   void changeID(changeId) {
     setState(() {
-      changeId = category_id;
+      changeId = categoryId;
     });
   }
 
-  List<Map<String, dynamic>> _items = [];
+  // List<Map<String, dynamic>> _items = [];
 
-  final _shoppingBox = Hive.box('shopping_box');
+  // final _shoppingBox = Hive.box('shopping_box');
 
-  Future<List<DatumTopProducts?>?> _createItem(
-      List<DatumTopProducts?>? newItem) async {
-    await _shoppingBox.add(newItem);
-    print("amount data is ${_shoppingBox.length}");
-    return newItem;
-  }
+  // Future<List<DatumTopProducts?>?> _createItem(
+  //     List<DatumTopProducts?>? newItem) async {
+  //   await _shoppingBox.add(newItem);
+  //   print("amount data is ${_shoppingBox.length}");
+  //   return newItem;
+  // }
 
-  final String name = "";
-  final String price = "";
+  // final String name = "";
+  // final String price = "";
 
-  List favoriteIds = [];
+  List<int?> favoriteIds = [];
   bool addToFavorite = false;
   int currentlyCheckedIndex = -1;
 
@@ -94,6 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
     var providerproductById = Provider.of<ProductByIdViewModel>(context);
 
     var providerFavorite = Provider.of<FavoritesViewModel>(context);
+
+    var providerFavv = Provider.of<FavViewModel>(context);
 
     return Container(
       child: (provider.loading &&
@@ -155,11 +167,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   currentlyIndex = index;
                                   test = index;
                                   checkedCategory = true;
-                                  category_id = providerCategories
+                                  categoryId = providerCategories
                                       .getCategoriesList![index]!.id!;
-                                  print("checkItem  $category_id");
+                                  print("checkItem  $categoryId");
                                   print("$currentlyIndex");
-                                  changeID(category_id);
+                                  // changeID(categoryId);
+                                  ByCategoryScreen(providerCategories.getCategoriesList![index]!.id);
                                 });
                               },
                               child: Container(
@@ -191,87 +204,92 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 (
                         // checkedCategory == true
-                        currentlyIndex == test)
+                        currentlyIndex == test
+                        )
                     ? Container(
-                        child: (providerproductById.loading)
-                            ? CircularProgressIndicator.adaptive()
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                primary: false,
-                                itemCount:
-                                    providerproductById.productByIdList?.length,
-                                itemBuilder: ((context, index) {
-                                  // print("object");
-                                  // index = category_id;
-                                  return InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailScreen(
-                                              topProductListItem:
-                                                  providerproductById
-                                                      .productByIdList![index],
-                                            ),
-                                          ));
-                                    },
-                                    child: Card(
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            margin: const EdgeInsets.all(5.0),
-                                            width: 100,
-                                            height: 100,
-                                            // color: Colors.green,
-                                            child: CachedNetworkImage(
-                                              imageUrl:
-                                                  "http://osonsavdo.devapp.uz/images/${providerproductById.productByIdList?[index]?.image}",
-                                              progressIndicatorBuilder:
-                                                  (context, url, progress) {
-                                                return Center(
-                                                    child:
-                                                        CircularProgressIndicator
-                                                            .adaptive(
-                                                  value: progress.progress,
-                                                ));
-                                              },
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 5,
-                                          ),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  // "tt"
-                                                  "${providerproductById.productByIdList?[index]?.name}",
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                const SizedBox(
-                                                  height: 5,
-                                                ),
-                                                Text(
-                                                  "${providerproductById.productByIdList?[index]?.price} So'm",
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                })))
+                        child: 
+                        (providerproductById.loading)
+                            ? Center(child: CircularProgressIndicator.adaptive())
+                            : 
+                            ByCategoryScreen(categoryId)
+                            // ListView.builder(
+                            //     shrinkWrap: true,
+                            //     primary: false,
+                            //     itemCount:
+                            //         providerproductById.productByIdList?.length,
+                            //     itemBuilder: ((context, index) {
+                            //       // print("object");
+                            //       // index = category_id;
+                            //       return InkWell(
+                            //         onTap: () {
+                            //           Navigator.push(
+                            //               context,
+                            //               MaterialPageRoute(
+                            //                 builder: (context) => DetailScreen(
+                            //                   topProductListItem:
+                            //                       providerproductById
+                            //                           .productByIdList![index],
+                            //                 ),
+                            //               ));
+                            //         },
+                            //         child: Card(
+                            //           child: Row(
+                            //             children: [
+                            //               Container(
+                            //                 margin: const EdgeInsets.all(5.0),
+                            //                 width: 100,
+                            //                 height: 100,
+                            //                 // color: Colors.green,
+                            //                 child: CachedNetworkImage(
+                            //                   imageUrl:
+                            //                       "http://osonsavdo.devapp.uz/images/${providerproductById.productByIdList?[index]?.image}",
+                            //                   progressIndicatorBuilder:
+                            //                       (context, url, progress) {
+                            //                     return Center(
+                            //                         child:
+                            //                             CircularProgressIndicator
+                            //                                 .adaptive(
+                            //                       value: progress.progress,
+                            //                     ));
+                            //                   },
+                            //                 ),
+                            //               ),
+                            //               const SizedBox(
+                            //                 width: 5,
+                            //               ),
+                            //               Expanded(
+                            //                 child: Column(
+                            //                   crossAxisAlignment:
+                            //                       CrossAxisAlignment.start,
+                            //                   children: [
+                            //                     Text(
+                            //                       // "tt"
+                            //                       "${providerproductById.productByIdList?[index]?.name}",
+                            //                       maxLines: 2,
+                            //                       overflow:
+                            //                           TextOverflow.ellipsis,
+                            //                       style: const TextStyle(
+                            //                           fontWeight:
+                            //                               FontWeight.bold),
+                            //                     ),
+                            //                     const SizedBox(
+                            //                       height: 5,
+                            //                     ),
+                            //                     Text(
+                            //                       "${providerproductById.productByIdList?[index]?.price} So'm",
+                            //                       style: const TextStyle(
+                            //                           fontWeight:
+                            //                               FontWeight.w500),
+                            //                     )
+                            //                   ],
+                            //                 ),
+                            //               )
+                            //             ],
+                            //           ),
+                            //         ),
+                            //       );
+                            //     }))
+                                )
                     : ListView.builder(
                         shrinkWrap: true,
                         primary: false,
@@ -319,7 +337,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          // "tt"
                                           "${providerTopProducts.topProductList?[index]?.name}",
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -334,37 +351,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                           style: const TextStyle(
                                               fontWeight: FontWeight.w500),
                                         ),
-                                        IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                final checkedId =favoriteIds.contains(providerTopProducts.topProductList?[index]?.id);
-                                                if (checkedId) {
-                                                  favoriteIds.remove(
-                                                      providerTopProducts
-                                                          .topProductList?[
-                                                              index]
-                                                          ?.id);
-                                                  addToFavorite = false;
-                                                  currentlyCheckedIndex = index;
-                                                } else {
-                                                  favoriteIds.add(
-                                                      providerTopProducts
-                                                          .topProductList?[
-                                                              index]
-                                                          ?.id);
-                                                  addToFavorite = true;
-                                                }
-                                                print(
-                                                    "setSta ${favoriteIds.length}");
-                                              });
-                                            },
-                                            icon: (favoriteIds.contains(
-                                                    providerTopProducts
-                                                        .topProductList?[index]
-                                                        ?.id))
-                                                ? Icon(Icons.favorite)
-                                                : Icon(Icons
-                                                    .favorite_border_outlined))
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(right: 24),
+                                              height: 24,
+                                              width: 24,
+                                              child: IconButton(
+                                                  onPressed: () async {
+                                                    setState(() {
+                                                       providerFavorite.addIdsToFavorite(providerTopProducts.topProductList?[index]?.id);
+                                                       HiveDB.getFavoriteBox();
+                                                       providerFavv.addIdsToFav(providerTopProducts.topProductList?[index]?.id.toString());
+                                                      
+                                                    });
+                                                  },
+                                                  icon: 
+                                                  (
+
+                                                    HiveDB.getFavoriteBox().contains(providerTopProducts.topProductList?[index]?.id)
+                                                    )
+                                                      ? Icon(Icons.favorite,color: Colors.deepOrangeAccent,)
+                                                      : Icon(Icons.favorite_border_outlined,color: Colors.deepOrangeAccent)),
+                                            ),
+                                          ],
+                                        )
                                       ],
                                     ),
                                   )
